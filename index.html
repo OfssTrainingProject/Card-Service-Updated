@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Management</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f7f9fc, #e9eef7);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .manage-section {
+            grid-column: 1;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .form-section {
+            grid-column: 2;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .form-section h2, .manage-section h2 {
+            color: #1e3c72;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #1e3c72;
+            outline: none;
+        }
+        button {
+            background-color: #1e3c72;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2a5298;
+        }
+        #successAlert, #errorAlert {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #successAlert {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        #errorAlert {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .manage-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .manage-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .manage-card h3 {
+            color: #1e3c72;
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .card-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .credit-card {
+            background: linear-gradient(135deg, #1A1F71, #2a5298); /* Default Visa */
+            color: white;
+            width: 350px;
+            height: 200px;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .credit-card.visa {
+            background: linear-gradient(135deg, #1A1F71, #2a5298);
+            color: #fff;
+        }
+        .credit-card.mastercard {
+            background: linear-gradient(135deg, #EB001B, #F79E1B);
+            color: #000000;
+        }
+        .credit-card.rupay {
+            background: linear-gradient(135deg, #002D62, #00AEEF);
+            color: #fff;
+        }
+        .credit-card .chip {
+            width: 40px;
+            height: 30px;
+            background: #FFB600; /* Default Visa */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
+        }
+        .credit-card.visa .chip {
+            background: #FFB600;
+        }
+        .credit-card.mastercard .chip {
+            background: #fff;
+        }
+        .credit-card.rupay .chip {
+            background: #F68B1F;
+        }
+        .logo {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: inherit;
+        }
+        #cardList, #cardDetails {
+            margin-top: 20px;
+        }
+        #cardList table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+        #cardList table, #cardList th, #cardList td {
+            border: 1px solid #ddd;
+        }
+        #cardList th, #cardList td {
+            padding: 10px;
+            text-align: left;
+        }
+        #cardList th {
+            background-color: #1e3c72;
+            color: white;
+        }
+        #cardList td button {
+            background-color: #dc3545;
+            padding: 5px 10px;
+            margin-left: 5px;
+        }
+        #cardList td button:hover {
+            background-color: #c82333;
+        }
+        @media (max-width: 900px) {
+            .manage-cards {
+                flex-direction: column;
+            }
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="manage-section">
+            <h2>Manage Cards</h2>
+            <div class="manage-cards">
+                <div class="manage-card">
+                    <h3>Search</h3>
+                    <div class="form-group">
+                        <label for="searchAccountNumber">Account Number</label>
+                        <input type="text" id="searchAccountNumber" name="searchAccountNumber" placeholder="Enter Account">
+                    </div>
+                    <button onclick="getCardsByAccount()">Search Cards</button>
+                </div>
+                <div class="manage-card">
+                    <h3>Delete</h3>
+                    <div class="form-group">
+                        <label for="deleteCardId">Card ID</label>
+                        <input type="number" id="deleteCardId" name="deleteCardId" placeholder="Enter ID">
+                    </div>
+                    <button onclick="deleteCard()">Delete</button>
+                </div>
+            </div>
+            <div id="cardDetails"></div>
+            <div id="cardList"></div>
+        </div>
+        <div class="form-section">
+            <h2>Issue Credit Card</h2>
+            <div class="card-display">
+                <div class="credit-card visa" id="cardDisplay">
+                    <div class="chip"></div>
+                    <div class="card-content">
+                        <div class="card-name" id="cardName">Customer Name</div>
+                        <div class="card-expiry" id="cardExpiry">VALID THRU 03/29</div>
+                    </div>
+                    <div class="logo" id="cardLogo">VISA</div>
+                </div>
+            </div>
+            <form id="issueCardForm">
+                <div class="form-group">
+                    <label for="cardType">Card Type</label>
+                    <select id="cardType" name="cardType" onchange="updateCardDesign()">
+                        <option value="VISA">VISA</option>
+                        <option value="MasterCard">MasterCard</option>
+                        <option value="RuPay">RuPay</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="accountNumber">Account Number</label>
+                    <input type="text" id="accountNumber" name="accountNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerName">Customer Name</label>
+                    <input type="text" id="customerName" name="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="creditLimit">Credit Limit</label>
+                    <input type="number" id="creditLimit" name="creditLimit" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiryDate">Expiry Date</label>
+                    <input type="date" id="expiryDate" name="expiryDate" required>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+            <div id="successAlert"></div>
+            <div id="errorAlert"></div>
+        </div>
+    </div>
+
+    <script>
+        const customerNameInput = document.getElementById('customerName');
+        const cardName = document.getElementById('cardName');
+        const expiryDateInput = document.getElementById('expiryDate');
+        const cardExpiry = document.getElementById('cardExpiry');
+        const issueCardForm = document.getElementById('issueCardForm');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const cardDetails = document.getElementById('cardDetails');
+        const cardList = document.getElementById('cardList');
+        const cardDisplay = document.getElementById('cardDisplay');
+        const cardLogo = document.getElementById('cardLogo');
+        const cardTypeSelect = document.getElementById('cardType');
+
+        // Update card name in real-time
+        customerNameInput.addEventListener('input', function() {
+            cardName.textContent = customerNameInput.value || 'Customer Name';
+        });
+
+        // Update expiry date
+        expiryDateInput.addEventListener('change', function() {
+            const date = new Date(expiryDateInput.value);
+            cardExpiry.textContent = `VALID THRU ${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear().toString().slice(-2)}`;
+        });
+
+        // Update card design based on selected card type
+        function updateCardDesign() {
+            const cardType = cardTypeSelect.value;
+
+            cardDisplay.className = `credit-card ${cardType.toLowerCase()}`;
+            cardLogo.textContent = cardType;
+
+            // Ensure chip is updated via class or direct style
+            const chip = cardDisplay.querySelector('.chip');
+            if (chip) {
+                chip.style.background = getChipColor(cardType);
+            }
+        }
+
+        // Helper function to get chip color based on card type
+        function getChipColor(cardType) {
+            switch (cardType) {
+                case 'VISA': return '#FFB600';
+                case 'MasterCard': return '#fff';
+                case 'RuPay': return '#F68B1F';
+                default: return '#ffeb3b';
+            }
+        }
+
+        // Initial call to set default design
+        updateCardDesign();
+
+        // Form submission
+        issueCardForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                cardType: document.getElementById('cardType').value,
+                accountNumber: document.getElementById('accountNumber').value,
+                customerName: document.getElementById('customerName').value,
+                creditLimit: document.getElementById('creditLimit').value,
+                expiryDate: document.getElementById('expiryDate').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/cards', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    successAlert.style.display = 'block';
+                    successAlert.textContent = 'Card issued successfully!';
+                    errorAlert.style.display = 'none';
+                    issueCardForm.reset();
+                } else {
+                    throw new Error('Failed to issue card');
+                }
+            } catch (error) {
+                errorAlert.style.display = 'block';
+                errorAlert.textContent = 'Error: ' + error.message;
+                successAlert.style.display = 'none';
+            }
+
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+                errorAlert.style.display = 'none';
+            }, 3000);
+        });
+
+        // Get Cards by Account Number
+        async function getCardsByAccount() {
+            const accountNumber = document.getElementById('searchAccountNumber').value;
+            if (!accountNumber) {
+                alert('Please enter an Account Number');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:8080/api/cards/account/${accountNumber}`);
+                const cards = await response.json();
+                displayCards(cards);
+            } catch (error) {
+                errorAlert.style.display = 'block';
+                errorAlert.textContent = 'Error: ' + error.message;
+                setTimeout(() => errorAlert.style.display = 'none', 3000);
+            }
+        }
+
+        // Delete Card
+        async function deleteCard() {
+            const id = document.getElementById('deleteCardId').value;
+            if (!id) {
+                alert('Please enter a Card ID');
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:8080/api/cards/${id}`, {
+                    method: 'DELETE',
+                });
+                if (response.ok) {
+                    successAlert.style.display = 'block';
+                    successAlert.textContent = 'Card deleted successfully!';
+                    errorAlert.style.display = 'none';
+                } else {
+                    throw new Error('Failed to delete card');
+                }
+            } catch (error) {
+                errorAlert.style.display = 'block';
+                errorAlert.textContent = 'Error: ' + error.message;
+                successAlert.style.display = 'none';
+            }
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+                errorAlert.style.display = 'none';
+            }, 3000);
+        }
+
+        // Display Card Details
+        function displayCardDetails(card) {
+            cardDetails.innerHTML = card ? `
+                <h3>Card Details</h3>
+                <p><strong>Customer Name:</strong> ${card.customerName}</p>
+                <p><strong>Credit Limit:</strong> ${card.creditLimit}</p>
+                <p><strong>Expiry Date:</strong> ${card.expiryDate}</p>
+            ` : '<p>No card found</p>';
+        }
+
+        // Display Cards List
+        function displayCards(cards) {
+            if (!cards || cards.length === 0) {
+                cardList.innerHTML = '<p>No cards found</p>';
+                return;
+            }
+            cardList.innerHTML = `
+                <h3>Card List</h3>
+                <table>
+                    <tr>
+                        <th>Card ID</th>
+                        <th>Customer Name</th>
+                        <th>Credit Limit</th>
+                        <th>Expiry Date</th>
+                        <th>Action</th>
+                    </tr>
+                    ${cards.map(card => `
+                        <tr>
+                            <td>${card.cardId}</td>
+                            <td>${card.customerName}</td>
+                            <td>${card.creditLimit}</td>
+                            <td>${card.expiryDate}</td>
+                            <td><button onclick="deleteCard(${card.cardId})">Delete</button></td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>
